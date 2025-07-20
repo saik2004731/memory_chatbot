@@ -1,0 +1,28 @@
+import os
+import fitz  # PyMuPDF
+import pandas as pd
+
+
+def save_file(uploaded_file):
+    os.makedirs("data", exist_ok=True)
+    file_path = os.path.join("data", uploaded_file.name)
+    with open(file_path, "wb") as f:
+        f.write(uploaded_file.read())
+    return file_path
+
+
+def load_docs(folder):
+    docs = []
+    for file in os.listdir(folder):
+        path = os.path.join(folder, file)
+        try:
+            if file.endswith(".pdf"):
+                doc = fitz.open(path)
+                text = "\n".join([page.get_text() for page in doc])
+                docs.append(text)
+            elif file.endswith(".csv"):
+                df = pd.read_csv(path)
+                docs.append(df.to_string())
+        except Exception as e:
+            print(f"❌ Error reading {file}: {e}")
+    return docs
